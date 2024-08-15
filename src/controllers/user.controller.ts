@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import db from "../database/prisma.connection";
+import generateHash from "../utils/generateHash";
 
 class UserController {
   public async list(req: Request, res: Response) {
     try {
-      const users = await db.users.findMany();
+      const users = await db.users.findMany({});
 
       return res
         .status(200)
@@ -16,17 +17,17 @@ class UserController {
   }
 
   public async create(req: Request, res: Response) {
-    const { studentId, password } = req.body;
+    const { email, password } = req.body;
 
     try {
-      if (!studentId || !password) {
+      if (!email || !password) {
         return res
           .status(400)
           .json({ success: false, msg: "Required fields." });
       }
       const findStudent = await db.students.findUnique({
         where: {
-          id: studentId,
+          email,
         },
       });
       if (!findStudent) {
@@ -34,15 +35,25 @@ class UserController {
           .status(400)
           .json({ success: false, msg: "Student not found." });
       }
-      const user = await db.users.create({
+
+      const hash = generateHash(password);
+
+      const newUser = await db.users.create({
         data: {
-          studentId,
-          password,
+          studentId: findStudent.id,
+          password: hash,
         },
       });
-      return res
-        .status(200)
-        .json({ success: true, msg: "Users created.", data: user });
+
+      return res.status(200).json({
+        success: true,
+        msg: "Users created.",
+        data: {
+          id: newUser.id,
+          studentId: newUser.studentId,
+          enable: newUser.enable,
+        },
+      });
     } catch (error) {
       console.log(error);
       return res.status(500).json({ success: false, msg: "ERROR Database." });
