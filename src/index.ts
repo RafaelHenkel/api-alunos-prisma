@@ -5,11 +5,13 @@ import classroomsRoutes from "./routes/classrooms.routes";
 import registrationsRoutes from "./routes/registrations.routes";
 import usersRoutes from "./routes/users.routes";
 import authRoutes from "./routes/auth.routes";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 //ROUTES
 app.use("/students", studentsRoutes());
