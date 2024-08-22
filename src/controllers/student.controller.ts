@@ -85,7 +85,6 @@ class StudentController {
       const student = await db.students.findUnique({
         where: {
           id,
-          email,
         },
       });
 
@@ -102,6 +101,7 @@ class StudentController {
           },
           data: {
             name,
+            email,
           },
         });
 
